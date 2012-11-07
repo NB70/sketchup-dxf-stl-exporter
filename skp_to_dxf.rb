@@ -1,7 +1,8 @@
 # SketchUp to DXF STL Converter
-# Last edited: February 18, 2011
-# Authors: Nathan Bromham, Konrad Shroeder
-# Download from: http://www.guitar-list.com/download-software/convert-sketchup-skp-files-dxf-or-stl
+# download from http://http://www.guitar-list.com/download-software/convert-sketchup-skp-files-dxf-or-stl
+# Original authors: Nathan Bromham, Konrad Shroeder
+# with extra code from git-hub sketchup-stl project
+# License: Apache License, Version 2.0
 
 require 'sketchup.rb'
 
@@ -18,11 +19,11 @@ def dxf_export_mesh_file
       $face_count = 0
       $line_count = 0
       entities = model.entities
-      if (Sketchup.version_number < 7)
-        model.start_operation("export_dxf_mesh")
-      else
-         model.start_operation("export_dxf_mesh",true)
-      end
+      #if (Sketchup.version_number < 7)
+      #  model.start_operation("export_dxf_mesh")
+      #else
+      #   model.start_operation("export_dxf_mesh",true)
+      #end
       if ss.empty?
          answer = UI.messagebox("No objects selected. Export entire model?", MB_YESNOCANCEL)
          if( answer == 6 )
@@ -44,15 +45,16 @@ def dxf_export_mesh_file
           file_type="dxf"
          end
          #exported file name
-         out_name = UI.savepanel( file_type+" file location", "." , "#{File.basename(model.path).split(".")[0]}." +file_type )
-         $mesh_file = File.new( out_name , "w" )  
-         model_name = model_filename.split(".")[0]
-         dxf_header(dxf_option,model_name)
-         # Recursively export faces and edges, exploding groups as we go.
-         #Count "other" objects we can't parse.
-         others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
-         dxf_end(dxf_option,model_name)
-         UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+         out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
+         if out_name
+            $mesh_file = File.new( out_name , "w" )  
+            model_name = model_filename.split(".")[0]
+            dxf_header(dxf_option,model_name)
+            # Recursively export faces and edges, exploding groups as we go, counting any entities we can't export
+            others = dxf_find_faces(0, export_ents, Geom::Transformation.new(), model.active_layer.name,dxf_option)
+            dxf_end(dxf_option,model_name)
+            UI.messagebox( $face_count.to_s + " faces exported " + $line_count.to_s + " lines exported\n" + others.to_s + " objects ignored" )
+         end
       end
       model.commit_operation
 end
@@ -60,7 +62,7 @@ end
 def dxf_find_faces(others, entities, tform, layername,dxf_option)
    entities.each do |entity|
       #Face entity
-      if( entity.typename == "Face")
+      if( entity.is_a?(Sketchup::Face) )
        case dxf_option
        when "polylines"
         dxf_write_polyline(entity,tform,layername)
@@ -74,20 +76,16 @@ def dxf_find_faces(others, entities, tform, layername,dxf_option)
      #Edge entity
       elsif( entity.typename == "Edge") and((dxf_option=="lines")or(entity.faces.length==0 and dxf_option!="stl"))
        dxf_write_edge(entity, tform, layername)
-     #Group entity
-      elsif( entity.typename == "Group")
-         if entity.name==""
-           entity.name="GROUP"+$group_count.to_s
-           $group_count+=1
-         end
-         others = dxf_find_faces(others, entity.entities, tform * entity.transformation, entity.name,dxf_option)
-      #Componentinstance entity
-      elsif( entity.typename == "ComponentInstance")
-         if entity.name==""
-           entity.name="COMPONENT"+$component_count.to_s
-           $component_count+=1
-         end
-         others = dxf_find_faces(others, entity.definition.entities, tform * entity.transformation, entity.name,dxf_option)
+    #Group and component:instance entities
+     elsif entity.is_a?(Sketchup::Group) || entity.is_a?(Sketchup::ComponentInstance)
+      if entity.is_a?(Sketchup::Group)
+        # (!) Beware - Due to a SketchUp bug this is sometimes incorrect.
+        definition = entity.entities.parent
+      else
+        definition = entity.definition
+      end
+      layer = ( entity.name.empty? ) ? definition.name : entity.name
+      others = dxf_find_faces(others, definition.entities,tform * entity.transformation,layer,dxf_option)     
       else
          others = others + 1
       end
@@ -235,7 +233,8 @@ def dxf_dxf_options_dialog
 end
 
 def dxf_dxf_units_dialog
-   cu=Sketchup.active_model.options[0]["LengthUnit"]
+   cu=Sketchup.active_model.options['UnitsOptions']["LengthUnit"]
+   # cu=Sketchup.active_model.options[0]["LengthUnit"]
    case cu
    when 4
       current_unit= "Meters"
@@ -285,9 +284,27 @@ def dxf_end(dxf_option,model_name)
   $mesh_file.close
 end
 
-if( not file_loaded?("skp_to_dxf.rb") )
-   add_separator_to_menu("Tools")
-   UI.menu("Tools").add_item("Export to DXF or STL") { dxf_export_mesh_file }
+if( not $sketchup_stl_loaded )
+  IS_MAC = ( Object::RUBY_PLATFORM =~ /darwin/i ? true : false )
+  # Pick menu indexes for where to insert the Export menu. These numbers where
+  # picked when SketchUp 8 M4 was the latest version.
+  if IS_MAC
+    insert_index = 19
+  else
+    insert_index = 17
+  end
+  # (i) The menu_index argument isn't supported by older versions.
+  if Sketchup::Menu.instance_method(:add_item).arity == 1
+    UI.menu('File').add_item('Export to DXF or STL') {
+      dxf_export_mesh_file
+    }
+     UI.menu("Tools").add_item('Export to DXF or STL') { dxf_export_mesh_file }
+  else
+    UI.menu('File').add_item('Export to DXF or STL', insert_index) {
+      dxf_export_mesh_file
+    }
+    UI.menu("Tools").add_item('Export to DXF or STL', insert_index) { dxf_export_mesh_file }
+  end
 end
 
-file_loaded("skp_to_dxf.rb")
+$sketchup_stl_loaded = true
