@@ -8,7 +8,7 @@ The latest version is available from http://www.guitar-list.com/download-softwar
 
 To install the plugin you need to download the file "skp_to_dxf.rb" to your Sketchup plugins folder. This installation method will work with Sketchup 6, 7 and 8.
 
-###Location of the Sketchup plugins folder,  [VERSION] stands for the version number of Sketchup (6, 7 or 8).
+####Location of the Sketchup plugins folder,  [VERSION] stands for the version number of Sketchup (6, 7 or 8).
 
 On a Windows PC. If you have installed Sketchup on the C: drive then this folder will be at C:\program files\google\google sketchup [VERSION]\plugins. 
 On Mac OSX. The sketchup plugins folder is /Library/Application Support/Google SketchUp [VERSION]/SketchUp/Plugins
