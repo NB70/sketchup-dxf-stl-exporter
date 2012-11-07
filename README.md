@@ -2,17 +2,16 @@
 
 It's a SketchUp Ruby plugin that adds STL (STereoLithography) and AutoCAD DXF file export formats
 
-## Installing
+## Installing the plugin
 
 The latest version is available from http://www.guitar-list.com/download-software/convert-sketchup-skp-files-dxf-or-stl
 
-To install the plugin you need to download the file above (skp_to_dxf.rb) to your Sketchup plugins folder. This installation method will work with Sketchup 6, 7 and 8.
+To install the plugin you need to download the file "skp_to_dxf.rb" to your Sketchup plugins folder. This installation method will work with Sketchup 6, 7 and 8.
 
-    Location of the Sketchup plugins folder,  [VERSION] stands for the version number of Sketchup (6, 7 or 8).
+###Location of the Sketchup plugins folder,  [VERSION] stands for the version number of Sketchup (6, 7 or 8).
 
-        On a Windows PC. If you have installed Sketchup on the C: drive then this folder will be at C:\program files\google\google sketchup [VERSION]\plugins. 
-        On Mac OSX. The sketchup plugins folder is /Library/Application Support/Google SketchUp [VERSION]/SketchUp/Plugins
-.
+On a Windows PC. If you have installed Sketchup on the C: drive then this folder will be at C:\program files\google\google sketchup [VERSION]\plugins. 
+On Mac OSX. The sketchup plugins folder is /Library/Application Support/Google SketchUp [VERSION]/SketchUp/Plugins
 
 ##Using the plugin
 After copying this file, start Sketchup and you should now have an extra menu options (Export to DXF or STL) in the Sketchup Tools and File-export menu.
