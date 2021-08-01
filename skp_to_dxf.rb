@@ -45,9 +45,15 @@ def dxf_export_mesh_file
           file_type="dxf"
          end
          #exported file name
-         out_name = UI.savepanel( file_type.upcase + " file location", "" , "#{File.basename(model.path).split(".")[0]}untitled." +file_type )
-         if out_name
-            $mesh_file = File.new( out_name , "w" )  
+		 file_name = ""
+		 if (model.path != "")
+			file_name = File.basename(model.path, ".*")
+		 else
+			file_name = "untitled"
+		 end
+         out_file = UI.savepanel( file_type.upcase + " file location", "" , "#{file_name}." + file_type )
+         if out_file
+            $mesh_file = File.new( out_file , "w" )  
             model_name = model_filename.split(".")[0]
             dxf_header(dxf_option,model_name)
             # Recursively export faces and edges, exploding groups as we go, counting any entities we can't export
