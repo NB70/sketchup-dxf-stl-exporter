@@ -36,9 +36,10 @@ def dxf_export_mesh_file
       end
       if (export_ents.length > 0)
          #get units for export
-         dxf_dxf_units_dialog
+         return if not dxf_dxf_units_dialog
          #get DXF export option
          dxf_option = dxf_dxf_options_dialog
+		 return if not dxf_option
          if (dxf_option =="stl")
           file_type="stl"
          else
