@@ -39,19 +39,19 @@ def dxf_export_mesh_file
          return if not dxf_dxf_units_dialog
          #get DXF export option
          dxf_option = dxf_dxf_options_dialog
-		 return if not dxf_option
+	 return if not dxf_option
          if (dxf_option =="stl")
           file_type="stl"
          else
           file_type="dxf"
          end
          #exported file name
-		 file_name = ""
-		 if (model.path != "")
-			file_name = File.basename(model.path, ".*")
-		 else
-			file_name = "untitled"
-		 end
+	 file_name = ""
+	 if (model.path != "")
+	  file_name = File.basename(model.path, ".*")
+	 else
+	  file_name = "untitled"
+	 end
          out_file = UI.savepanel( file_type.upcase + " file location", "" , "#{file_name}." + file_type )
          if out_file
             $mesh_file = File.new( out_file , "w" )  
