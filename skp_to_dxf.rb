@@ -215,7 +215,7 @@ def dxf_write_polyface(face,tform,layername)
       $mesh_file.puts( " 72\n"+polygon[1].to_s)
       $mesh_file.puts( " 73\n"+polygon[2].to_s)
       if (polygon.length==4)
-        $mesh_file.puts( " 74\n"+polygon[3]..abs.to_s)
+        $mesh_file.puts( " 74\n"+polygon[3].abs.to_s)
       end
   end
   $mesh_file.puts( "  0\nSEQEND")
